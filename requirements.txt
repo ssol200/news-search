@@ -1,4 +1,6 @@
 streamlit
-google-genai
 pandas
+requests
+beautifulsoup4
+google-genai
 supabase
