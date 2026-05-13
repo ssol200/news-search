@@ -1,40 +1,257 @@
-# 📰 Gemini 실시간 뉴스 검색기 만들기
+아래 내용을 **README.md에 그대로 붙여넣으면 돼.**
+단, 맨 위/아래에 ```md 이런 코드블록은 넣지 마.
 
-이 프로젝트는 구글의 최신 AI(Gemini)를 활용해 실시간으로 뉴스를 검색하고, 내용을 요약하여 CSV 파일로 저장할 수 있는 웹 애플리케이션입니다. 코딩을 몰라도 다음 단계를 따라하면 10분 만에 완성할 수 있습니다!
+# 📰 LLM 기반 뉴스 검색 앱
 
-## 🚀 시작하기 5단계
+## 📌 1. 프로젝트 개요
 
-### [1단계] AI Studio에서 Gemini API 키 발급받기
-AI의 두뇌를 빌려 쓰기 위한 '출입증'을 받는 과정입니다.
-1. [Google AI Studio](https://aistudio.google.com/apikey)에 접속하세요.
-2. 구글 로그인을 합니다.
-3. 좌측 상단 파란색 **"Get API key"** 버튼을 클릭하세요.
-4. **"Create API key in new project"**를 클릭하여 키를 생성합니다.
-5. `AIza...`로 시작하는 긴 문자열이 나옵니다. 옆의 복사 아이콘을 눌러 메모장에 잘 적어두세요.
-   - ⚠️ **주의**: 이 키가 공개되면 다른 사람이 내 한도를 다 쓸 수 있습니다. 절대 코드에 직접 적지 마세요!
+본 프로젝트는 **Streamlit**을 활용하여 구현한 **LLM 기반 뉴스 검색 앱**입니다.
 
-### [2단계] GitHub에 코드 올리기
-내 코드를 저장할 '온라인 저장소'를 만드는 과정입니다.
-1. [GitHub](https://github.com)에 로그인하고 오른쪽 상단 `+` 버튼 -> **New repository**를 누릅니다.
-2. 이름(예: `my-news-app`)을 정하고 **Create repository**를 누릅니다.
-3. 위에서 제공된 `app.py`, `requirements.txt` 파일을 직접 만들거나 업로드하세요.
+사용자는 관심 있는 키워드를 입력하여 **Google Search 기반 Gemini 뉴스 검색 결과**와 **Naver 뉴스 검색 API 결과**를 비교할 수 있습니다.
 
-### [3단계] GitHub Codespaces 열기
-내 컴퓨터에 설치 없이 인터넷 브라우저 상에서 서버를 실행하는 과정입니다.
-1. 내 저장소 화면 상단 초록색 **"<> Code"** 버튼을 누릅니다.
-2. **"Codespaces"** 탭을 클릭하고 **"Create codespace on main"**을 누릅니다.
-3. 잠시 기다리면 웹 브라우저 안에 VS Code 편집기가 나타납니다.
+또한 Naver 뉴스 검색 결과 중 실제 접속 가능한 기사 링크를 검증한 후, 검증된 뉴스 데이터를 **Supabase 데이터베이스**에 저장하고, 저장된 데이터를 앱 화면에서 조회할 수 있도록 구현하였습니다.
 
-### [4단계] Secrets에 API 키 등록하기 (★ 가장 중요)
-가장 많이 실수하는 부분입니다. 보안을 위해 키를 숨겨서 등록해야 합니다.
-1. [GitHub Codespaces 설정 페이지](https://github.com/settings/codespaces)로 이동합니다.
-2. **"Personal Codespaces secrets"** 섹션에서 **"New secret"**을 누릅니다.
-3. **Name**에는 정확히 `GEMINI_API_KEY` 라고 적습니다.
-4. **Value**에는 아까 복사한 `AIza...`로 시작하는 키를 붙여넣습니다.
-5. **Repository access**에서 이 프로젝트 저장소를 선택하고 **Add secret**을 누릅니다.
-6. ⚠️ **중요**: 다시 Codespace 화면으로 돌아와서 `Ctrl + Shift + P`를 누르고 `Codespaces: Rebuild Container`를 검색해 실행하세요. (설정을 새로고침하는 과정입니다)
+---
 
-### [5단계] 앱 실행하기
-1. 화면 하단 터미널(Terminal) 창에 다음 명령어를 입력하고 엔터를 누릅니다.
-   ```bash
-   pip install -r requirements.txt
+## 🌐 2. 사이트 주소
+
+* Streamlit 배포 주소:
+  [https://본인주소.streamlit.app/](https://본인주소.streamlit.app/)
+
+---
+
+## 💻 3. GitHub 주소
+
+* GitHub Repository:
+  [https://github.com/본인계정/news-search/](https://github.com/본인계정/news-search/)
+
+---
+
+## 🛠 4. 사용 기술
+
+| 구분        | 사용 기술                     |
+| --------- | ------------------------- |
+| 웹 앱 프레임워크 | Streamlit                 |
+| LLM API   | Gemini API                |
+| 뉴스 검색 API | Naver News Search API     |
+| 데이터베이스    | Supabase                  |
+| 데이터 처리    | Pandas                    |
+| 링크 검증     | Requests, BeautifulSoup   |
+| 배포        | Streamlit Community Cloud |
+
+---
+
+## ✨ 5. 주요 기능
+
+### 🔍 5.1 Google Search 기반 Gemini 뉴스 검색
+
+Gemini API의 Google Search 기능을 활용하여 사용자가 입력한 키워드와 관련된 최신 뉴스 정보를 검색하고 요약합니다.
+
+검색 결과는 다음과 같은 형식으로 제공됩니다.
+
+* 뉴스 제목
+* 언론사
+* 날짜
+* 원문 URL
+* 뉴스 요약
+
+---
+
+### 🟢 5.2 Naver 뉴스 검색 API
+
+Naver Developers에서 제공하는 **뉴스 검색 API**를 활용하여 입력한 키워드와 관련된 네이버 뉴스 검색 결과를 가져옵니다.
+
+검색 결과에는 다음 정보가 포함됩니다.
+
+* 뉴스 제목
+* 언론사 원문 링크
+* 네이버 뉴스 링크
+* 기사 요약
+* 발행일
+
+---
+
+### ⚖️ 5.3 Google 결과와 Naver 결과 비교
+
+동일한 검색어에 대해 **Google Search 기반 Gemini 결과**와 **Naver 뉴스 API 결과**를 한 화면에서 비교할 수 있습니다.
+
+이를 통해 검색 API별 결과 차이를 확인할 수 있습니다.
+
+---
+
+### 🔗 5.4 기사 링크 검증
+
+뉴스 검색 결과의 링크가 실제 기사와 연결되는지 확인하기 위해 다음과 같은 검증 절차를 수행합니다.
+
+* URL 형식 확인
+* 실제 접속 가능 여부 확인
+* 리다이렉트 후 최종 URL 확인
+* 실제 페이지 제목 추출
+* 검색 결과 제목과 실제 페이지 제목의 유사도 확인
+
+이를 통해 잘못된 기사 링크가 저장되는 문제를 줄였습니다.
+
+---
+
+### 💾 5.5 뉴스 데이터 저장
+
+검증된 Naver 뉴스 검색 결과를 Supabase 데이터베이스의 `naver_news_history` 테이블에 저장합니다.
+
+저장 시 다음 정보가 함께 기록됩니다.
+
+* 검색 키워드
+* 뉴스 제목
+* 기사 링크
+* 기사 요약
+* 발행일
+* 링크 검증 상태
+* 저장 시각
+
+---
+
+### 📋 5.6 저장 데이터 조회
+
+저장된 뉴스 데이터는 앱 화면에서 표 형태로 조회할 수 있습니다.
+
+또한 저장된 데이터를 CSV 파일로 다운로드할 수 있어 추후 분석 자료로도 활용할 수 있습니다.
+
+---
+
+## 🗄 6. 데이터베이스 설명
+
+본 앱은 **Supabase**를 데이터베이스로 사용합니다.
+
+기존 Google/Gemini 뉴스 검색 결과는 `news_history` 테이블에 저장하고, 새로 추가한 Naver 뉴스 검색 결과는 `naver_news_history` 테이블에 저장합니다.
+
+---
+
+## 📌 7. 테이블 구조
+
+### `naver_news_history`
+
+| 컬럼명                 | 설명                       |
+| ------------------- | ------------------------ |
+| `id`                | 저장 데이터 고유 번호             |
+| `keyword`           | 사용자가 입력한 검색어             |
+| `title`             | Naver 뉴스 검색 결과 제목        |
+| `originallink`      | 언론사 원문 기사 링크             |
+| `link`              | 네이버 뉴스 링크                |
+| `best_link`         | 검증 후 선택된 최종 기사 링크        |
+| `description`       | Naver 뉴스 검색 결과 요약        |
+| `pub_date`          | 기사 발행일                   |
+| `link_status`       | 링크 검증 상태                 |
+| `link_note`         | 링크 검증 결과 설명              |
+| `page_title`        | 실제 접속한 페이지의 제목           |
+| `title_match_score` | 검색 결과 제목과 실제 페이지 제목의 유사도 |
+| `created_at`        | DB 저장 시각                 |
+
+---
+
+## 🧱 8. Supabase 테이블 생성 SQL
+
+```sql
+create table if not exists naver_news_history (
+    id bigint generated by default as identity primary key,
+    keyword text not null,
+    title text,
+    originallink text,
+    link text unique,
+    best_link text,
+    description text,
+    pub_date text,
+    link_status text,
+    link_note text,
+    page_title text,
+    title_match_score numeric,
+    created_at timestamp with time zone default timezone('utc'::text, now())
+);
+```
+
+---
+
+## 🧩 9. 코드 주요 함수 설명
+
+### `search_naver_news()`
+
+Naver 뉴스 검색 API를 호출하여 검색어와 관련된 뉴스 결과를 가져오는 함수입니다.
+
+---
+
+### `verify_news_link()`
+
+기사 링크가 실제로 접속 가능한지 확인하고, 페이지 제목을 추출하여 검색 결과 제목과의 유사도를 계산하는 함수입니다.
+
+---
+
+### `choose_best_link()`
+
+Naver 뉴스 검색 결과의 `originallink`와 `link`를 비교하여 더 적절한 최종 기사 링크를 선택하는 함수입니다.
+
+---
+
+### `save_naver_news()`
+
+검증된 Naver 뉴스 검색 결과를 Supabase의 `naver_news_history` 테이블에 저장하는 함수입니다.
+
+---
+
+### `load_naver_news()`
+
+Supabase에 저장된 Naver 뉴스 데이터를 불러와 앱 화면에 표 형태로 표시하는 함수입니다.
+
+---
+
+## ▶️ 10. 실행 방법
+
+아래 명령어를 통해 필요한 라이브러리를 설치합니다.
+
+```bash
+pip install -r requirements.txt
+```
+
+이후 Streamlit 앱을 실행합니다.
+
+```bash
+streamlit run app.py
+```
+
+---
+
+## 🔐 11. 환경변수 설정
+
+앱 실행을 위해 다음 API 키와 접속 정보가 필요합니다.
+
+로컬 환경에서는 `.streamlit/secrets.toml` 파일에 입력하고, Streamlit Cloud에서는 앱 설정의 **Secrets** 메뉴에 입력합니다.
+
+```toml
+GEMINI_API_KEY = "본인_Gemini_API_Key"
+
+SUPABASE_URL = "본인_Supabase_URL"
+SUPABASE_KEY = "본인_Supabase_Key"
+
+NAVER_CLIENT_ID = "본인_Naver_Client_ID"
+NAVER_CLIENT_SECRET = "본인_Naver_Client_Secret"
+```
+
+---
+
+## 📦 12. requirements.txt
+
+```txt
+streamlit
+pandas
+requests
+beautifulsoup4
+google-genai
+supabase
+```
+
+---
+
+## 🙋‍♀️ 13. 프로젝트 정리
+
+본 프로젝트에서는 LLM 기반 뉴스 검색 기능에 Naver 뉴스 검색 API를 추가하여 검색 결과를 비교할 수 있도록 구현하였습니다.
+
+또한 뉴스 검색 결과를 단순히 보여주는 데 그치지 않고, 검증된 뉴스 링크를 데이터베이스에 저장하고 조회할 수 있도록 구성하였습니다.
+
+이를 통해 뉴스 검색, 데이터 저장, 데이터 조회, API 비교 기능을 포함한 LLM 기반 검색 앱을 완성하였습니다.
