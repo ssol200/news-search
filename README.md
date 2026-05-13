@@ -13,7 +13,7 @@
 ## 🌐 2. 사이트 주소
 
 * Streamlit 배포 주소:
-  [https://본인주소.streamlit.app/](https://본인주소.streamlit.app/)
+  [https://news-search-2026-bm.streamlit.app]
 
 ---
 
