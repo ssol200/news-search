@@ -285,7 +285,7 @@ def save_google_news(keyword: str, news: dict):
 
 
 def save_naver_news(news: dict):
-    """네이버 뉴스 검색 결과를 과제용 추가 테이블 naver_news_history에 저장합니다."""
+    """네이버 검색 결과를 과제용 추가 테이블 naver_news_history에 저장합니다."""
     db_record = {
         "keyword": news.get("keyword"),
         "title": news.get("title"),
@@ -312,14 +312,14 @@ def get_table_data(table_name: str):
 # -------------------------------------------------------------------
 st.title("📰 LLM 기반 뉴스 검색 앱")
 st.info(
-    "💡 구글 검색 뉴스와 네이버 뉴스 검색 결과를 비교하고, "
-    "각 검색 결과를 Supabase DB에 저장할 수 있습니다."
+    "💡 구글과 네이버를 활용한 뉴스 검색 결과를 비교하고, "
+    "각 결과를 Supabase DB에 저장할 수 있습니다."
 )
 
 tab1, tab2, tab3, tab4 = st.tabs([
     "🔍 검색 및 비교",
-    "💾 구글 뉴스 검색 결과",
-    "🟢 네이버 뉴스 검색 결과",
+    "💾 구글 검색 결과",
+    "🟢 네이버 검색 결과",
     "📊 통계/DB 설명"
 ])
 
@@ -327,7 +327,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # 탭 1: 구글 검색 결과와 네이버 검색 결과 비교
 # ==========================================
 with tab1:
-    st.subheader("구글 검색 뉴스와 네이버 뉴스 검색 결과 비교")
+    st.subheader("구글 검색 결과와 네이버 검색 결과 비교")
 
     keyword = st.text_input("검색할 뉴스 키워드를 입력하세요", placeholder="예: 인공지능, 보건의료데이터, 데이터뱅크")
     st.markdown("#### 검색 조건")
@@ -356,7 +356,7 @@ with tab1:
                 with st.spinner("Gemini가 구글 검색을 사용해 최신 뉴스를 검색하고 요약 중입니다..."):
                     try:
                         google_news_data = search_google_news_with_gemini(keyword, result_count=display_count)
-                        st.success(f"구글 뉴스 {len(google_news_data)}건 검색 완료")
+                        st.success(f"구글 검색 결과 {len(google_news_data)}건 검색 완료")
 
                         for idx, news in enumerate(google_news_data, start=1):
                             verification = verify_news_link(
@@ -399,7 +399,7 @@ with tab1:
             # Naver News API 결과
             # --------------------------
             with col2:
-                st.markdown("### ② 네이버 뉴스 검색 결과")
+                st.markdown("### ② 네이버 검색 결과")
                 naver_saved_count = 0
                 naver_duplicate_count = 0
 
@@ -448,7 +448,7 @@ with tab1:
 # 탭 2: 기존 Google/Gemini 저장 뉴스 보기
 # ==========================================
 with tab2:
-    st.subheader("구글 뉴스 검색 결과 저장 목록")
+    st.subheader("구글 검색 결과 저장 목록")
 
     try:
         google_data = get_table_data("news_history")
@@ -456,7 +456,7 @@ with tab2:
         if google_data:
             df_google = pd.DataFrame(google_data)
 
-            search_term = st.text_input("구글 뉴스 검색 결과 필터링", "", key="google_filter")
+            search_term = st.text_input("구글 검색 결과 필터링", "", key="google_filter")
 
             if search_term:
                 df_google = df_google[
@@ -474,22 +474,22 @@ with tab2:
 
             csv_data = df_google.to_csv(index=False, encoding="utf-8-sig")
             st.download_button(
-                label="📥 구글 뉴스 검색 결과 CSV 다운로드",
+                label="📥 구글 검색 결과 CSV 다운로드",
                 data=csv_data,
                 file_name="saved_google_news_history.csv",
                 mime="text/csv"
             )
         else:
-            st.info("아직 저장된 구글 뉴스 검색 결과가 없습니다.")
+            st.info("아직 저장된 구글 검색 결과가 없습니다.")
 
     except Exception as e:
-        st.error(f"구글 뉴스 검색 결과를 불러오는 중 오류가 발생했습니다: {e}")
+        st.error(f"구글 검색 결과를 불러오는 중 오류가 발생했습니다: {e}")
 
 # ==========================================
 # 탭 3: 네이버 저장 뉴스 보기
 # ==========================================
 with tab3:
-    st.subheader("네이버 뉴스 검색 결과 저장 목록")
+    st.subheader("네이버 검색 결과 저장 목록")
 
     try:
         naver_data = get_table_data("naver_news_history")
@@ -497,7 +497,7 @@ with tab3:
         if naver_data:
             df_naver = pd.DataFrame(naver_data)
 
-            search_term = st.text_input("네이버 뉴스 검색 결과 필터링", "", key="naver_filter")
+            search_term = st.text_input("네이버 검색 결과 필터링", "", key="naver_filter")
 
             if search_term:
                 df_naver = df_naver[
@@ -519,7 +519,7 @@ with tab3:
 
             csv_data = df_naver.to_csv(index=False, encoding="utf-8-sig")
             st.download_button(
-                label="📥 네이버 뉴스 검색 결과 CSV 다운로드",
+                label="📥 네이버 검색 결과 CSV 다운로드",
                 data=csv_data,
                 file_name="saved_naver_news_history.csv",
                 mime="text/csv"
@@ -529,7 +529,7 @@ with tab3:
 
     except Exception as e:
         st.error(
-            "네이버 뉴스 검색 결과를 불러오는 중 오류가 발생했습니다. "
+            "네이버 검색 결과를 불러오는 중 오류가 발생했습니다. "
             "Supabase에 naver_news_history 테이블이 생성되어 있는지 확인해주세요."
         )
         st.write(e)
@@ -553,7 +553,7 @@ with tab4:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("### 📌 구글 뉴스 검색 결과 통계")
+        st.markdown("### 📌 구글 검색 결과 통계")
         if google_data:
             df_google_stats = pd.DataFrame(google_data)
             keyword_counts = df_google_stats["keyword"].value_counts()
@@ -564,10 +564,10 @@ with tab4:
                 date_counts = df_google_stats["date_only"].value_counts().sort_index()
                 st.line_chart(date_counts)
         else:
-            st.info("구글 뉴스 검색 결과 통계를 표시할 데이터가 없습니다.")
+            st.info("구글 검색 결과 통계를 표시할 데이터가 없습니다.")
 
     with col2:
-        st.markdown("### 📌 네이버 뉴스 검색 결과 통계")
+        st.markdown("### 📌 네이버 검색 결과 통계")
         if naver_data:
             df_naver_stats = pd.DataFrame(naver_data)
             keyword_counts = df_naver_stats["keyword"].value_counts()
@@ -578,13 +578,13 @@ with tab4:
                 date_counts = df_naver_stats["date_only"].value_counts().sort_index()
                 st.line_chart(date_counts)
         else:
-            st.info("네이버 뉴스 검색 결과 통계를 표시할 데이터가 없습니다.")
+            st.info("네이버 검색 결과 통계를 표시할 데이터가 없습니다.")
 
     st.divider()
 
     st.markdown("### 🗂️ 추가 테이블 설명: `naver_news_history`")
     st.write(
-        "과제 요구사항인 '네이버 뉴스 검색 결과 저장을 위한 추가 테이블'로 "
+        "과제 요구사항인 '네이버 검색 결과 저장을 위한 추가 테이블'로 "
         "`naver_news_history` 테이블을 사용합니다."
     )
 
@@ -607,7 +607,7 @@ with tab4:
         "설명": [
             "저장 데이터 고유 번호",
             "사용자가 입력한 검색어",
-            "네이버 뉴스 검색 결과 제목",
+            "네이버 검색 결과 제목",
             "언론사 원문 링크",
             "네이버 뉴스 링크",
             "검증 후 최종 선택된 기사 링크",
