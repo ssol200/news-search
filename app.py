@@ -12,7 +12,7 @@ from supabase import create_client, Client
 # -------------------------------------------------------------------
 # 1. 페이지 기본 설정
 # -------------------------------------------------------------------
-st.set_page_config(page_title="최신 뉴스 검색 및 저장 앱", page_icon="📰", layout="wide")
+st.set_page_config(page_title="LLM 기반 뉴스 검색 앱", page_icon="📰", layout="wide")
 
 # -------------------------------------------------------------------
 # 2. 비밀 키(Secrets) 불러오기 및 초기화
@@ -186,10 +186,10 @@ def extract_json_array(raw_text: str):
     return json.loads(clean_json_str)
 
 
-def search_google_news_with_gemini(keyword: str):
-    """Gemini Google Search 도구를 활용해 최신 뉴스 5건을 JSON 형식으로 받습니다."""
+def search_google_news_with_gemini(keyword: str, result_count: int = 5):
+    """Gemini Google Search 도구를 활용해 최신 뉴스를 JSON 형식으로 받습니다."""
     prompt = f"""
-    다음 키워드에 대한 가장 최신 뉴스 5건을 검색하고 요약해주세요: '{keyword}'
+    다음 키워드에 대한 가장 최신 뉴스 {result_count}건을 검색하고 요약해주세요: '{keyword}'
 
     [요구사항]
     1. Google Search를 사용해 최신 정보를 가져오세요.
@@ -310,16 +310,16 @@ def get_table_data(table_name: str):
 # -------------------------------------------------------------------
 # 4. 화면 UI 구성
 # -------------------------------------------------------------------
-st.title("📰 AI 최신 뉴스 검색 & 자동 저장기")
+st.title("📰 LLM 기반 뉴스 검색 앱")
 st.info(
-    "💡 Gemini Google Search 결과와 네이버 뉴스 검색 API 결과를 비교하고, "
+    "💡 구글 검색 뉴스와 네이버 뉴스 검색 결과를 비교하고, "
     "각 검색 결과를 Supabase DB에 저장할 수 있습니다."
 )
 
 tab1, tab2, tab3, tab4 = st.tabs([
     "🔍 검색 및 비교",
-    "💾 Google 저장 뉴스",
-    "🟢 Naver 저장 뉴스",
+    "💾 구글 뉴스 검색 결과",
+    "🟢 네이버 뉴스 검색 결과",
     "📊 통계/DB 설명"
 ])
 
@@ -327,11 +327,16 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # 탭 1: 구글 검색 결과와 네이버 검색 결과 비교
 # ==========================================
 with tab1:
-    st.subheader("Google Search 기반 LLM 뉴스와 네이버 뉴스 검색 결과 비교")
+    st.subheader("구글 검색 뉴스와 네이버 뉴스 검색 결과 비교")
 
     keyword = st.text_input("검색할 뉴스 키워드를 입력하세요", placeholder="예: 인공지능, 보건의료데이터, 데이터뱅크")
-    display_count = st.slider("네이버 뉴스 검색 개수", min_value=5, max_value=20, value=5, step=1)
-    naver_sort_label = st.radio("네이버 뉴스 정렬 기준", ["최신순", "정확도순"], horizontal=True)
+    st.markdown("#### 검색 조건")
+    display_count = st.slider("검색 결과 개수", min_value=5, max_value=20, value=5, step=1)
+
+    with st.expander("🟢 네이버 뉴스 API 정렬 옵션", expanded=False):
+        st.caption("구글 검색은 별도 정렬 기준을 직접 지정하기 어려워, 네이버 뉴스 API에만 정렬 기준을 적용합니다.")
+        naver_sort_label = st.radio("네이버 뉴스 정렬 기준", ["최신순", "정확도순"], horizontal=True)
+
     naver_sort = "date" if naver_sort_label == "최신순" else "sim"
 
     if st.button("뉴스 검색 및 비교", type="primary"):
@@ -344,14 +349,14 @@ with tab1:
             # Google Search + Gemini 결과
             # --------------------------
             with col1:
-                st.markdown("### ① Google Search + Gemini 결과")
+                st.markdown("### ① 구글 검색 결과")
                 google_saved_count = 0
                 google_duplicate_count = 0
 
-                with st.spinner("Gemini가 Google Search를 사용해 최신 뉴스를 검색하고 요약 중입니다..."):
+                with st.spinner("Gemini가 구글 검색을 사용해 최신 뉴스를 검색하고 요약 중입니다..."):
                     try:
-                        google_news_data = search_google_news_with_gemini(keyword)
-                        st.success(f"Google 기반 뉴스 {len(google_news_data)}건 검색 완료")
+                        google_news_data = search_google_news_with_gemini(keyword, result_count=display_count)
+                        st.success(f"구글 뉴스 {len(google_news_data)}건 검색 완료")
 
                         for idx, news in enumerate(google_news_data, start=1):
                             verification = verify_news_link(
@@ -385,16 +390,16 @@ with tab1:
                                 else:
                                     st.error(f"Google 결과 DB 저장 중 오류: {db_e}")
 
-                        st.caption(f"Google 결과 저장: 신규 {google_saved_count}건 / 중복 {google_duplicate_count}건")
+                        st.caption(f"구글 결과 저장: 신규 {google_saved_count}건 / 중복 {google_duplicate_count}건")
 
                     except Exception as e:
-                        st.error(f"Google/Gemini 검색 중 오류가 발생했습니다: {e}")
+                        st.error(f"구글 검색 중 오류가 발생했습니다: {e}")
 
             # --------------------------
             # Naver News API 결과
             # --------------------------
             with col2:
-                st.markdown("### ② Naver News API 결과")
+                st.markdown("### ② 네이버 뉴스 검색 결과")
                 naver_saved_count = 0
                 naver_duplicate_count = 0
 
@@ -434,7 +439,7 @@ with tab1:
                                 else:
                                     st.error(f"Naver 결과 DB 저장 중 오류: {db_e}")
 
-                        st.caption(f"Naver 결과 저장: 신규 {naver_saved_count}건 / 중복 {naver_duplicate_count}건")
+                        st.caption(f"네이버 결과 저장: 신규 {naver_saved_count}건 / 중복 {naver_duplicate_count}건")
 
                     except Exception as e:
                         st.error(f"네이버 뉴스 검색 중 오류가 발생했습니다: {e}")
@@ -443,7 +448,7 @@ with tab1:
 # 탭 2: 기존 Google/Gemini 저장 뉴스 보기
 # ==========================================
 with tab2:
-    st.subheader("Google Search + Gemini 결과 저장 목록")
+    st.subheader("구글 뉴스 검색 결과 저장 목록")
 
     try:
         google_data = get_table_data("news_history")
@@ -451,7 +456,7 @@ with tab2:
         if google_data:
             df_google = pd.DataFrame(google_data)
 
-            search_term = st.text_input("Google 저장 목록 필터링", "", key="google_filter")
+            search_term = st.text_input("구글 뉴스 검색 결과 필터링", "", key="google_filter")
 
             if search_term:
                 df_google = df_google[
@@ -469,22 +474,22 @@ with tab2:
 
             csv_data = df_google.to_csv(index=False, encoding="utf-8-sig")
             st.download_button(
-                label="📥 Google 저장 데이터 CSV 다운로드",
+                label="📥 구글 뉴스 검색 결과 CSV 다운로드",
                 data=csv_data,
                 file_name="saved_google_news_history.csv",
                 mime="text/csv"
             )
         else:
-            st.info("아직 저장된 Google/Gemini 뉴스가 없습니다.")
+            st.info("아직 저장된 구글 뉴스 검색 결과가 없습니다.")
 
     except Exception as e:
-        st.error(f"Google 저장 데이터를 불러오는 중 오류가 발생했습니다: {e}")
+        st.error(f"구글 뉴스 검색 결과를 불러오는 중 오류가 발생했습니다: {e}")
 
 # ==========================================
 # 탭 3: 네이버 저장 뉴스 보기
 # ==========================================
 with tab3:
-    st.subheader("Naver News API 결과 저장 목록")
+    st.subheader("네이버 뉴스 검색 결과 저장 목록")
 
     try:
         naver_data = get_table_data("naver_news_history")
@@ -492,7 +497,7 @@ with tab3:
         if naver_data:
             df_naver = pd.DataFrame(naver_data)
 
-            search_term = st.text_input("Naver 저장 목록 필터링", "", key="naver_filter")
+            search_term = st.text_input("네이버 뉴스 검색 결과 필터링", "", key="naver_filter")
 
             if search_term:
                 df_naver = df_naver[
@@ -514,7 +519,7 @@ with tab3:
 
             csv_data = df_naver.to_csv(index=False, encoding="utf-8-sig")
             st.download_button(
-                label="📥 Naver 저장 데이터 CSV 다운로드",
+                label="📥 네이버 뉴스 검색 결과 CSV 다운로드",
                 data=csv_data,
                 file_name="saved_naver_news_history.csv",
                 mime="text/csv"
@@ -524,7 +529,7 @@ with tab3:
 
     except Exception as e:
         st.error(
-            "Naver 저장 데이터를 불러오는 중 오류가 발생했습니다. "
+            "네이버 뉴스 검색 결과를 불러오는 중 오류가 발생했습니다. "
             "Supabase에 naver_news_history 테이블이 생성되어 있는지 확인해주세요."
         )
         st.write(e)
@@ -548,7 +553,7 @@ with tab4:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("### 📌 Google 저장 뉴스 통계")
+        st.markdown("### 📌 구글 뉴스 검색 결과 통계")
         if google_data:
             df_google_stats = pd.DataFrame(google_data)
             keyword_counts = df_google_stats["keyword"].value_counts()
@@ -559,10 +564,10 @@ with tab4:
                 date_counts = df_google_stats["date_only"].value_counts().sort_index()
                 st.line_chart(date_counts)
         else:
-            st.info("Google 저장 뉴스 통계를 표시할 데이터가 없습니다.")
+            st.info("구글 뉴스 검색 결과 통계를 표시할 데이터가 없습니다.")
 
     with col2:
-        st.markdown("### 📌 Naver 저장 뉴스 통계")
+        st.markdown("### 📌 네이버 뉴스 검색 결과 통계")
         if naver_data:
             df_naver_stats = pd.DataFrame(naver_data)
             keyword_counts = df_naver_stats["keyword"].value_counts()
@@ -573,7 +578,7 @@ with tab4:
                 date_counts = df_naver_stats["date_only"].value_counts().sort_index()
                 st.line_chart(date_counts)
         else:
-            st.info("Naver 저장 뉴스 통계를 표시할 데이터가 없습니다.")
+            st.info("네이버 뉴스 검색 결과 통계를 표시할 데이터가 없습니다.")
 
     st.divider()
 
