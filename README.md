@@ -20,7 +20,7 @@
 ## 💻 3. GitHub 주소
 
 * GitHub Repository:
-  [https://github.com/본인계정/news-search/](https://github.com/본인계정/news-search/)
+  [https://github.com/ssol200/news-search]
 
 ---
 
